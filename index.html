@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Sbase</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    /* base stl */
+body {
+    background-color: #212121;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+    margin-bottom: 70px;
+    padding-bottom: 70px;
+}
+
+/* cont */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 750px;
+    margin-bottom: 70px;
+    padding-bottom: 70px;
+}
+
+/* tool bar */
+.toolbar {
+    background-color: #303030;
+    border: 1px solid #4d4d4d;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.left-tools, .right-tools {
+    display: flex;
+    gap: 3px;
+}
+
+/* tool btn */
+.tool-btn {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    border-radius: 12px;
+    padding: 8px 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+}
+
+.tool-btn img {
+    width: 21.5px;
+    height: 21.5px;
+    object-fit: contain;
+}
+
+/* hov efct */
+.tool-btn:hover {
+    background-color: #181818;
+}
+
+/* actv btn */
+.tool-btn.active {
+    background-color: #181818;
+}
+
+.tool-btn.active img {
+    filter: brightness(1.5);
+}
+
+/* edt cont */
+.editor-container {
+    width: 100%;
+}
+
+/* edt area */
+#editor {
+    width: 100%;
+    min-height: 15px;
+    color: #ffffff;
+    padding: 10px 0;
+    outline: none;
+    border-left: 1.5px solid #303030;
+    overflow-y: hidden;
+    white-space: pre-wrap;
+    padding-right: 45px; /* You can adjust this value as needed */
+    padding-left: 25px; /* You can adjust this value as needed */
+    word-break: break-word;
+    margin-bottom: 130px;
+}
+
+/* hdng stls */
+#editor h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block;
+    line-height: inherit;
+}
+
+#editor h2 {
+    font-size: 2em;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block;
+    line-height: inherit;
+}
+
+/* list stls */
+#editor ol, #editor ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-left: 1.5em !important;
+    display: block;
+}
+
+#editor ol li, #editor ul li {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: list-item;
+}
+
+#editor ol li::marker {
+    font-size: inherit;
+}
+
+#editor ul li::marker {
+    font-size: inherit;
+}
+
+/* make sho list stls handl multi-line */
+#editor ol li p, #editor ul li p {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* zero all margins on block elmts */
+#editor > ol, #editor > ul,
+#editor > h1, #editor > h2,
+#editor > p {
+    margin-block-start: 0 !important;
+    margin-block-end: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* indntd list stls */
+#editor ol ol {
+    list-style-type: lower-alpha;
+}
+
+#editor ol ol ol {
+    list-style-type: decimal;
+}
+
+#editor ol ol ol ol {
+    list-style-type: lower-alpha;
+}
+
+/* focus */
+#editor:focus {
+    border-left: 3px solid #303030;
+}
+</style>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <div class="left-tools">
+                <button class="tool-btn" onclick="formatText('bold')"><img src="https://woahomar066.github.io/Writing_Space_Icons/bold.png" alt="Bold"></button>
+                <button class="tool-btn" onclick="formatText('italic')"><img src="https://woahomar066.github.io/Writing_Space_Icons/italic.png" alt="Italic"></button>
+                <button class="tool-btn" onclick="formatText('underline')"><img src="https://woahomar066.github.io/Writing_Space_Icons/underline.png" alt="Underline"></button>
+                <button class="tool-btn" onclick="formatText('orderedList')"><img src="https://woahomar066.github.io/Writing_Space_Icons/numberlist.png" alt="Numbered List"></button>
+                <button class="tool-btn" onclick="formatText('unorderedList')"><img src="https://woahomar066.github.io/Writing_Space_Icons/bullet.png" alt="Bullet List"></button>
+                <button class="tool-btn" onclick="formatText('heading1')"><img src="https://woahomar066.github.io/Writing_Space_Icons/h2.png" alt="Bullet List"></button>
+                <button class="tool-btn" onclick="formatText('heading2')"><img src="https://woahomar066.github.io/Writing_Space_Icons/h1.png" alt="Bullet List"></button>
+            </div>
+            <div class="right-tools">
+                <button class="tool-btn" onclick="undoAction()"><img src="https://woahomar066.github.io/Writing_Space_Icons/undo.png" alt="Undo"></button>
+                <button class="tool-btn" onclick="redoAction()"><img src="https://woahomar066.github.io/Writing_Space_Icons/redo.png" alt="Redo"></button>
+                <button class="tool-btn" onclick="copyText()"><img src="https://woahomar066.github.io/Writing_Space_Icons/copy.png" alt="Copy"></button>
+                <button class="tool-btn" onclick="clearText()"><img src="https://woahomar066.github.io/Writing_Space_Icons/clear.png" alt="Clear"></button>
+            </div>
+        </div>
+        <div class="editor-container">
+            <div id="editor" contenteditable="true"></div>
+        </div>
+    </div>
+
+    <script>
+        // get da elmts
+        const editor = document.getElementById('editor');
+        const toolBtns = document.querySelectorAll('.tool-btn');
+        
+        // func 4 txt fmt
+        function formatText(format) {
+            // chk if in hdng
+            const node = window.getSelection().anchorNode;
+            let parent = node ? node.parentNode : null;
+            let isInHeading = false;
+            while (parent && parent !== editor) {
+                if (parent.nodeName === 'H1' || parent.nodeName === 'H2') {
+                    isInHeading = true;
+                    break;
+                }
+                parent = parent.parentNode;
+            }
+            
+            // if in hdng, only allow hdng cmds
+            if (isInHeading && !['heading1', 'heading2'].includes(format)) {
+                return; // dont allw othr fmt in hdngs
+            }
+            
+            // rmv old act btns
+            toolBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // find da btn dat mach da fmt
+            const button = Array.from(toolBtns).find(btn => {
+                const imgAlt = btn.querySelector('img')?.alt.toLowerCase();
+                const btnText = btn.textContent;
+                if (format === 'bold' && imgAlt === 'bold') return true;
+                if (format === 'italic' && imgAlt === 'italic') return true;
+                if (format === 'underline' && imgAlt === 'underline') return true;
+                if (format === 'orderedList' && imgAlt === 'numbered list') return true;
+                if (format === 'unorderedList' && imgAlt === 'bullet list') return true;
+                if (format === 'heading1' && btnText === 'H1') return true;
+                if (format === 'heading2' && btnText === 'H2') return true;
+                return false;
+            });
+            
+            // make btn actv
+            if (button) button.classList.add('active');
+            
+            // aply da fmt
+            if (format === 'heading1') {
+                document.execCommand('formatBlock', false, 'h1');
+            } else if (format === 'heading2') {
+                document.execCommand('formatBlock', false, 'h2');
+            } else {
+                document.execCommand(format === 'orderedList' ? 'insertOrderedList' : 
+                                    format === 'unorderedList' ? 'insertUnorderedList' : format);
+            }
+            
+            // focus edt
+            editor.focus();
+        }
+        
+        // undo actn
+        function undoAction() {
+            document.execCommand('undo');
+            editor.focus();
+        }
+        
+        // redo actn
+        function redoAction() {
+            document.execCommand('redo');
+            editor.focus();
+        }
+        
+        // copy txt
+        function copyText() {
+            const selection = window.getSelection();
+            const selectedText = selection.toString();
+            
+            if (selectedText) {
+                navigator.clipboard.writeText(selectedText)
+                    .then(() => {
+                        // cpy sucess
+                    })
+                    .catch(err => {
+                        console.error('cud not cpy: ', err);
+                    });
+            } else {
+                // no txt selctd, cpy all
+                const allText = editor.innerText;
+                navigator.clipboard.writeText(allText)
+                    .then(() => {
+                        // cpy sucess
+                    })
+                    .catch(err => {
+                        console.error('cud not cpy: ', err);
+                    });
+            }
+            editor.focus();
+        }
+        
+        // clr all txt
+        function clearText() {
+            document.execCommand('selectAll');
+            document.execCommand('delete');
+            editor.focus();
+        }
+        
+        // chk actv fmt
+        function checkActiveFormatting() {
+            // rmv all actv
+            toolBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // chk if in hdng
+            const node = window.getSelection().anchorNode;
+            let parent = node ? node.parentNode : null;
+            let isInHeading = false;
+            while (parent && parent !== editor) {
+                if (parent.nodeName === 'H1' || parent.nodeName === 'H2') {
+                    isInHeading = true;
+                    break;
+                }
+                parent = parent.parentNode;
+            }
+            
+            // disbl all othr btns if in hdng
+            toolBtns.forEach(btn => {
+                const imgAlt = btn.querySelector('img')?.alt.toLowerCase();
+                const btnText = btn.textContent;
+                
+                if (isInHeading) {
+                    // disbl all non-hdng btns
+                    if (btnText !== 'H1' && btnText !== 'H2') {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                    } else {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                        // only actv hdng btns that match curr hdng
+                        if (parent && parent.nodeName === 'H1' && btnText === 'H1') btn.classList.add('active');
+                        if (parent && parent.nodeName === 'H2' && btnText === 'H2') btn.classList.add('active');
+                    }
+                } else {
+                    // enbl all btns when not in hdng
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    
+                    // chk each fmt
+                    const isBold = document.queryCommandState('bold');
+                    const isItalic = document.queryCommandState('italic');
+                    const isUnderline = document.queryCommandState('underline');
+                    const isOrderedList = document.queryCommandState('insertOrderedList');
+                    const isUnorderedList = document.queryCommandState('insertUnorderedList');
+                    
+                    // updt btn stats
+                    if (isBold && imgAlt === 'bold') btn.classList.add('active');
+                    if (isItalic && imgAlt === 'italic') btn.classList.add('active');
+                    if (isUnderline && imgAlt === 'underline') btn.classList.add('active');
+                    if (isOrderedList && imgAlt === 'numbered list') btn.classList.add('active');
+                    if (isUnorderedList && imgAlt === 'bullet list') btn.classList.add('active');
+                }
+            });
+        }
+        
+        // add kbd shrtcts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undoAction();
+            } else if ((e.ctrlKey && e.shiftKey && e.key === 'Z') || 
+                       (e.ctrlKey && e.key === 'y')) {
+                e.preventDefault();
+                redoAction();
+            }
+        });
+        
+        // chk fmt on slct chng
+        document.addEventListener('selectionchange', function() {
+            if (document.activeElement === editor) {
+                checkActiveFormatting();
+            }
+        });
+        
+        // auto list detct & tab handlr
+        editor.addEventListener('keydown', function(e) {
+            // sft + ent = ent
+            if (e.key === 'Enter' && e.shiftKey) {
+                e.preventDefault();
+                document.execCommand('insertLineBreak');
+                return;
+            }
+            
+            // tab handlr 4 indnt
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const selection = window.getSelection();
+                const node = selection.anchorNode;
+                let listItem = node;
+                
+                // find da list item
+                while (listItem && listItem !== editor && listItem.nodeName !== 'LI') {
+                    listItem = listItem.parentNode;
+                }
+                
+                if (listItem && listItem.nodeName === 'LI') {
+                    // in a list
+                    const parentList = listItem.parentNode;
+                    const currentLevel = getListLevel(listItem);
+                    
+                    if (e.shiftKey) {
+                        // unindnt
+                        if (currentLevel > 0) {
+                            document.execCommand('outdent');
+                        }
+                    } else {
+                        // get curr list itm elm
+                        const range = selection.getRangeAt(0);
+                        const curListItem = range.startContainer.parentElement.closest('li');
+                        
+                        // only indnt curr itm
+                        if (curListItem) {
+                            // save curr sel
+                            const savedSelection = {
+                                startOffset: range.startOffset,
+                                startContainer: range.startContainer
+                            };
+                            
+                            // slct only curr itm
+                            const listRange = document.createRange();
+                            listRange.selectNodeContents(curListItem);
+                            selection.removeAllRanges();
+                            selection.addRange(listRange);
+                            
+                            // indnt it
+                            document.execCommand('indent');
+                            
+                            // fix list styl
+                            const newLevel = getListLevel(curListItem);
+                            const newParentList = curListItem.parentElement;
+                            
+                            if (newLevel % 2 === 1) {
+                                newParentList.style.listStyleType = 'lower-alpha';
+                            } else {
+                                newParentList.style.listStyleType = 'decimal';
+                            }
+                            
+                            // restor sel
+                            const newRange = document.createRange();
+                            newRange.setStart(savedSelection.startContainer, savedSelection.startOffset);
+                            newRange.collapse(true);
+                            selection.removeAllRanges();
+                            selection.addRange(newRange);
+                        }
+                    }
+                } else {
+                    // not in a list, add tab chr
+                    document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                }
+            }
+            
+            if (e.key === ' ') {
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const startContainer = range.startContainer;
+                const startOffset = range.startOffset;
+                
+                if (startContainer.nodeType === Node.TEXT_NODE) {
+                    const text = startContainer.textContent;
+                    const textBeforeCursor = text.substring(0, startOffset);
+                    
+                    // detct "n. " pattrn
+                    if (/^\d+\.\s*$/.test(textBeforeCursor)) {
+                        e.preventDefault();
+                        // del evrythng bfr num
+                        document.execCommand('selectAll', false, null);
+                        const fullText = selection.toString();
+                        document.execCommand('delete');
+                        document.execCommand('insertOrderedList');
+                        // insrt rest of txt
+                        const remainingText = fullText.replace(/^\d+\.\s*/, '');
+                        if (remainingText) {
+                            document.execCommand('insertText', false, remainingText);
+                        }
+                    }
+                    // detct "• " pattrn
+                    else if (/^•\s*$/.test(textBeforeCursor)) {
+                        e.preventDefault();
+                        // del evrythng bfr bullet
+                        document.execCommand('selectAll', false, null);
+                        const fullText = selection.toString();
+                        document.execCommand('delete');
+                        document.execCommand('insertUnorderedList');
+                        // insrt rest of txt
+                        const remainingText = fullText.replace(/^•\s*/, '');
+                        if (remainingText) {
+                            document.execCommand('insertText', false, remainingText);
+                        }
+                    }
+                }
+            }
+        });
+        
+        // hlp func to get list lvl
+        function getListLevel(element) {
+            let level = 0;
+            let parent = element.parentNode;
+            while (parent && parent !== editor) {
+                if (parent.nodeName === 'OL' || parent.nodeName === 'UL') {
+                    level++;
+                }
+                parent = parent.parentNode;
+            }
+            return level;
+        }
+        
+        // mak sho edt grows wit txt
+        editor.addEventListener('input', function() {
+            // no need 4 js, css handls it
+            
+            // chk fmt aftr txt chng
+            setTimeout(checkActiveFormatting, 0);
+        });
+        
+        // chk fmt on focus
+        editor.addEventListener('focus', checkActiveFormatting);
+    </script>
+</body>
+</html>
